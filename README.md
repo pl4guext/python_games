@@ -1,4 +1,4 @@
-# REPO Publico :wheelchair: :wheelchair: :wheelchair: 
+# REPO Publica :wheelchair: :wheelchair: :wheelchair: 
 
 # Comandos
     # DESCARGAR ZIP
