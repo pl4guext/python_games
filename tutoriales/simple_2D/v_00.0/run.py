@@ -11,6 +11,7 @@ except Exception, e:
 try:
     from config import *
     from app.pygame_tools.image_tools import *
+    from app.pygame_tools.sprites import *
 except Exception, e:
     print 'FAILED TO IMPORT INNER TOOLS: ',e
     exit(1)
@@ -22,20 +23,21 @@ except Exception, e:
 
 
 def __init__():
-    global x, y, x_speed, conf, game, color, window_size, flag_end, mario_img, x_ball, y_ball, x_speed_ball, y_speed_ball
+    global x, y, x_speed, conf, game, color, window_size, flag_end, mario_img, x_ball, y_ball, x_speed_ball, y_speed_ball, human
 
     conf = env_variables()
     game = game_variables()
     color = colors()
     window_size = conf.window_size
     x = conf.center_x
-    y = conf.center_y
+    y = conf.height - 80
     x_ball = 20
     y_ball = 20
     x_speed = 0
     x_speed_ball = game.x_speed_ball
     y_speed_ball = game.y_speed_ball
     flag_end = False
+    human = human(50)
     mario_img = pygame.image.load('app/static/images/mario.png')
     mario_img = pygame.transform.scale(mario_img, game.object_size)
 
@@ -48,6 +50,9 @@ def __init__():
 
 def mario(_x, _y):
     gameDisplay.blit(mario_img, (_x,_y))
+
+def humano(_pos, _x, _y):
+    gameDisplay.blit(human.run(_pos), (_x,_y))
 
 
 def event_handler():
@@ -69,10 +74,13 @@ def event_handler():
                 x_speed = 0
 
 
-def on_draw():
+def on_draw(_pos):
         gameDisplay.fill(color.white)
-        mario(x,y)
+        gameDisplay.blit(back_img, (0,0))
+        # mario(x,y)
+        humano(_pos, x, y)
         pygame.draw.circle(gameDisplay, color.red, (x_ball, y_ball), game.ball_rad) 
+        gameDisplay.blit(front_img, (0,0))
         pygame.display.update()
 
 def update_pos():
@@ -114,22 +122,50 @@ def check_collision():
 
 
 if __name__ == "__main__":
+    global back_img, front_img
+    
+
+    pygame.init()
 
     __init__()
 
-    pygame.init()
     gameDisplay = pygame.display.set_mode( window_size )
     pygame.display.set_caption('Titulo')
     clock = pygame.time.Clock()
 
+
+    back_img = pygame.image.load('app/static/images/cave_background.png')
+    front_img = pygame.image.load('app/static/images/cave_front.png')
+
+    print "SIZE_BACK: ", back_img.get_rect().size
+
+    resize_width = int( (float(conf.height)/back_img.get_rect().size[1])*back_img.get_rect().size[0] )
+    resize_height = conf.height
+    back_img = pygame.transform.scale(back_img, ( resize_width, resize_height))
+    front_img = pygame.transform.scale(front_img, ( resize_width , resize_height))
+
+
+    pos = 0
+    i = 0 
     while not flag_end:
         event_handler()
         update_pos()
         update_ball()
 
+        
 
-        on_draw()
+
+        on_draw(pos)
         check_collision()
+
+        if i < 10:
+            i += 1
+        else:
+            i = 0
+            if pos< human.items -1:
+                pos += 1
+            else:
+                pos = 0
 
         clock.tick(60) # fps
 
